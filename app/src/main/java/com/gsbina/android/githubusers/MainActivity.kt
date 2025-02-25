@@ -10,10 +10,14 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.gsbina.android.githubusers.data.ApiModule
+import com.gsbina.android.githubusers.data.users.GitHubRepositoryImpl
 import com.gsbina.android.githubusers.data.users.GitHubUser
+import com.gsbina.android.githubusers.domain.users.GetUsersUseCase
 import com.gsbina.android.githubusers.ui.theme.GitHubUsersTheme
 import com.gsbina.android.githubusers.ui.users.UsersScreen
-import com.gsbina.android.githubusers.ui.users.UsersState
+import com.gsbina.android.githubusers.ui.users.UsersUiState
+import com.gsbina.android.githubusers.ui.users.UsersViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -22,22 +26,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             GitHubUsersTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-
-                    val state = UsersState(
-                        listOf(
-                            GitHubUser(
-                                id = 1,
-                                login = "bina1204",
-                                avatarUrl = "https://avatars.githubusercontent.com/u/943320?v=4"
-                            ),
-                            GitHubUser(
-                                id = 2,
-                                login = "octocat",
-                                avatarUrl = "https://avatars.githubusercontent.com/u/943320?v=4"
-                            )
-                        )
+                    UsersScreen(
+                        viewModel = UsersViewModel(GetUsersUseCase(GitHubRepositoryImpl(ApiModule.gitHubService))),
+                        modifier = Modifier.padding(innerPadding)
                     )
-                    UsersScreen(state = state, modifier = Modifier.padding(innerPadding))
                 }
             }
         }
@@ -48,20 +40,6 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun GreetingPreview() {
     GitHubUsersTheme {
-        val state = UsersState(
-            listOf(
-                GitHubUser(
-                    id = 1,
-                    login = "bina1204",
-                    avatarUrl = "https://avatars.githubusercontent.com/u/943320?v=4"
-                ),
-                GitHubUser(
-                    id = 2,
-                    login = "octocat",
-                    avatarUrl = "https://avatars.githubusercontent.com/u/943320?v=4"
-                )
-            )
-        )
-        UsersScreen(state = state)
+        UsersScreen(viewModel = UsersViewModel(GetUsersUseCase(repository = GitHubRepositoryImpl(ApiModule.gitHubService))))
     }
 }

@@ -1,8 +1,16 @@
 package com.gsbina.android.githubusers.data.users
 
+import com.gsbina.android.githubusers.BuildConfig
 import retrofit2.http.GET
+import retrofit2.http.Headers
+import retrofit2.http.Query
 
 interface GitHubService {
+    @Headers(
+        "Accept: application/vnd.github+json",
+        "Authorization: Bearer ${BuildConfig.GITHUB_TOKEN}",
+        "X-GitHub-Api-Version: 2022-11-28"
+    )
     @GET("users")
-    fun getUsers(): List<GitHubUser>
+    suspend fun getUsers(@Query("since") since: Int, @Query("per_page") perPage: Int): List<GitHubUser>
 }

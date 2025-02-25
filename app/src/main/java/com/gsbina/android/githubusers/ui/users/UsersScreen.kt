@@ -14,6 +14,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -23,15 +26,40 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import coil3.compose.AsyncImage
+import com.gsbina.android.githubusers.data.ApiModule
+import com.gsbina.android.githubusers.data.users.GitHubRepositoryImpl
 import com.gsbina.android.githubusers.data.users.GitHubUser
+import com.gsbina.android.githubusers.domain.users.GetUsersUseCase
 import com.gsbina.android.githubusers.ui.theme.GitHubUsersTheme
 
 @Composable
-fun UsersScreen(state: UsersState, modifier: Modifier = Modifier) {
+fun UsersScreen(
+    lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
+    viewModel: UsersViewModel,
+    modifier: Modifier = Modifier
+) {
+    val uiState by viewModel.uiState.collectAsState()
     LazyColumn(modifier = modifier.then(Modifier.fillMaxWidth().fillMaxHeight().background(Color.DarkGray))) {
-        items(state.users) { user ->
+        items(uiState.users) { user ->
             UserView(state = UserState(user))
+        }
+    }
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_CREATE) {
+                viewModel.getUsers()
+            }
+        }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
         }
     }
 }
@@ -63,7 +91,7 @@ fun UserView(state: UserState) {
             )
         }
         Column(modifier = Modifier.fillMaxWidth()) {
-            Text(state.login, fontSize = 16.sp)
+            Text(state.login, fontSize = 16.sp, color = Color.Black)
         }
     }
 }
@@ -72,21 +100,7 @@ fun UserView(state: UserState) {
 @Composable
 fun UsersScreenPreview() {
     GitHubUsersTheme {
-        val state = UsersState(
-            listOf(
-                GitHubUser(
-                    id = 1,
-                    login = "bina1204",
-                    avatarUrl = "https://avatars.githubusercontent.com/u/943320?v=4"
-                ),
-                GitHubUser(
-                    id = 2,
-                    login = "octocat",
-                    avatarUrl = "https://avatars.githubusercontent.com/u/943320?v=4"
-                )
-            )
-        )
-        UsersScreen(state = state, modifier = Modifier.padding())
+        UsersScreen(viewModel = UsersViewModel(GetUsersUseCase(repository = GitHubRepositoryImpl(ApiModule.gitHubService))), modifier = Modifier.padding())
     }
 }
 
