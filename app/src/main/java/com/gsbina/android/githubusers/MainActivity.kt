@@ -7,11 +7,13 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.gsbina.android.githubusers.data.users.GitHubUser
 import com.gsbina.android.githubusers.ui.theme.GitHubUsersTheme
+import com.gsbina.android.githubusers.ui.users.UsersScreen
+import com.gsbina.android.githubusers.ui.users.UsersState
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -20,28 +22,46 @@ class MainActivity : ComponentActivity() {
         setContent {
             GitHubUsersTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
+
+                    val state = UsersState(
+                        listOf(
+                            GitHubUser(
+                                id = 1,
+                                login = "bina1204",
+                                avatarUrl = "https://avatars.githubusercontent.com/u/943320?v=4"
+                            ),
+                            GitHubUser(
+                                id = 2,
+                                login = "octocat",
+                                avatarUrl = "https://avatars.githubusercontent.com/u/943320?v=4"
+                            )
+                        )
                     )
+                    UsersScreen(state = state, modifier = Modifier.padding(innerPadding))
                 }
             }
         }
     }
 }
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
     GitHubUsersTheme {
-        Greeting("Android")
+        val state = UsersState(
+            listOf(
+                GitHubUser(
+                    id = 1,
+                    login = "bina1204",
+                    avatarUrl = "https://avatars.githubusercontent.com/u/943320?v=4"
+                ),
+                GitHubUser(
+                    id = 2,
+                    login = "octocat",
+                    avatarUrl = "https://avatars.githubusercontent.com/u/943320?v=4"
+                )
+            )
+        )
+        UsersScreen(state = state)
     }
 }
