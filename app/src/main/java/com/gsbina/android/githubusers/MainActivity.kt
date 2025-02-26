@@ -17,6 +17,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.gsbina.android.githubusers.data.ApiModule
 import com.gsbina.android.githubusers.data.users.GitHubRepositoryImpl
+import com.gsbina.android.githubusers.domain.users.GetUserUseCase
 import com.gsbina.android.githubusers.domain.users.GetUsersUseCase
 import com.gsbina.android.githubusers.ui.Screen
 import com.gsbina.android.githubusers.ui.users.repos.UserDetailScreen
@@ -36,11 +37,10 @@ class MainActivity : ComponentActivity() {
                 ) {
                     val navController = rememberNavController()
                     val gitHubRepository = GitHubRepositoryImpl(ApiModule.gitHubService)
-                    val getUsersUseCase = GetUsersUseCase(gitHubRepository)
                     val usersViewModel: UsersViewModel =
-                        viewModel { UsersViewModel(getUsersUseCase) }
+                        viewModel { UsersViewModel(GetUsersUseCase(gitHubRepository)) }
                     val userViewModel: UserViewModel =
-                        viewModel { UserViewModel(gitHubRepository) }
+                        viewModel { UserViewModel(GetUserUseCase(gitHubRepository)) }
                     NavHost(
                         navController = navController,
                         startDestination = Screen.Users.route
