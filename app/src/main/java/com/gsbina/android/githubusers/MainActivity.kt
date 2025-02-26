@@ -3,33 +3,63 @@ package com.gsbina.android.githubusers
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.gsbina.android.githubusers.data.ApiModule
 import com.gsbina.android.githubusers.data.users.GitHubRepositoryImpl
-import com.gsbina.android.githubusers.data.users.GitHubUser
 import com.gsbina.android.githubusers.domain.users.GetUsersUseCase
+import com.gsbina.android.githubusers.ui.Screen
+import com.gsbina.android.githubusers.ui.users.repos.UserDetailScreen
 import com.gsbina.android.githubusers.ui.theme.GitHubUsersTheme
 import com.gsbina.android.githubusers.ui.users.UsersScreen
-import com.gsbina.android.githubusers.ui.users.UsersUiState
 import com.gsbina.android.githubusers.ui.users.UsersViewModel
+import com.gsbina.android.githubusers.ui.users.repos.UserViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContent {
             GitHubUsersTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    UsersScreen(
-                        viewModel = UsersViewModel(GetUsersUseCase(GitHubRepositoryImpl(ApiModule.gitHubService))),
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    val navController = rememberNavController()
+                    val gitHubRepository = GitHubRepositoryImpl(ApiModule.gitHubService)
+                    val getUsersUseCase = GetUsersUseCase(gitHubRepository)
+                    val usersViewModel: UsersViewModel =
+                        viewModel { UsersViewModel(getUsersUseCase) }
+                    val userViewModel: UserViewModel =
+                        viewModel { UserViewModel(gitHubRepository) }
+                    NavHost(
+                        navController = navController,
+                        startDestination = Screen.Users.route
+                    ) {
+                        composable(Screen.Users.route) {
+                            UsersScreen(
+                                navController = navController,
+                                viewModel = usersViewModel
+                            )
+                        }
+                        composable(
+                            route = Screen.UserDetail.route,
+                            arguments = listOf(navArgument("username") { type =
+                                NavType.StringType })
+                        ) { backStackEntry ->
+                            val username = backStackEntry.arguments?.getString("username") ?: ""
+                            UserDetailScreen(viewModel = userViewModel, username = username)
+                        }
+                    }
                 }
             }
         }
@@ -40,6 +70,6 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun GreetingPreview() {
     GitHubUsersTheme {
-        UsersScreen(viewModel = UsersViewModel(GetUsersUseCase(repository = GitHubRepositoryImpl(ApiModule.gitHubService))))
+        UsersScreen(navController = rememberNavController(), viewModel = UsersViewModel(GetUsersUseCase(repository = GitHubRepositoryImpl(ApiModule.gitHubService))))
     }
 }

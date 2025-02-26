@@ -22,5 +22,8 @@ data class GitHubUser(
 //    @SerialName("events_url") val eventsUrl: String,
 //    @SerialName("received_events_url") val receivedEventsUrl: String,
 //    val type: String,
-//    @SerialName("site_admin") val siteAdmin: Boolean
+//    @SerialName("site_admin") val siteAdmin: Boolean,
+    val name: String = "",
+    val followers: Int = 0,
+    val following: Int = 0,
 )

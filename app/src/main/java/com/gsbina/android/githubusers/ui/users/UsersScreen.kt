@@ -3,15 +3,18 @@ package com.gsbina.android.githubusers.ui.users
 import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -25,28 +28,33 @@ import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import coil3.compose.AsyncImage
 import com.gsbina.android.githubusers.data.ApiModule
 import com.gsbina.android.githubusers.data.users.GitHubRepositoryImpl
-import com.gsbina.android.githubusers.data.users.GitHubUser
 import com.gsbina.android.githubusers.domain.users.GetUsersUseCase
+import com.gsbina.android.githubusers.ui.Screen
 import com.gsbina.android.githubusers.ui.theme.GitHubUsersTheme
 
 @Composable
 fun UsersScreen(
+    navController: NavController,
     lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
     viewModel: UsersViewModel,
     modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    LazyColumn(modifier = modifier.then(Modifier.fillMaxWidth().fillMaxHeight().background(Color.DarkGray))) {
+    LazyColumn(modifier = modifier.then(
+        Modifier
+            .fillMaxWidth()
+            .background(Color.DarkGray))) {
         items(uiState.users) { user ->
-            UserView(state = UserState(user))
+            UserView(state = UserState(user), navController = navController)
         }
     }
     DisposableEffect(lifecycleOwner) {
@@ -65,11 +73,14 @@ fun UsersScreen(
 }
 
 @Composable
-fun UserView(state: UserState) {
-    Row(verticalAlignment = Alignment.CenterVertically,
+fun UserView(state: UserState, navController: NavController) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.White)) {
+            .clickable { navController.navigate(Screen.UserDetail.createRoute(state.login)) }
+            .background(Color.White)
+    ) {
         val contentDescription = "User Avatar"
         val modifier = Modifier
             .size(64.dp)
@@ -90,8 +101,9 @@ fun UserView(state: UserState) {
                 modifier = modifier
             )
         }
-        Column(modifier = Modifier.fillMaxWidth()) {
-            Text(state.login, fontSize = 16.sp, color = Color.Black)
+        Spacer(modifier = Modifier.width(16.dp))
+        Column {
+            Text(text = state.login, style = MaterialTheme.typography.titleMedium)
         }
     }
 }
@@ -100,7 +112,7 @@ fun UserView(state: UserState) {
 @Composable
 fun UsersScreenPreview() {
     GitHubUsersTheme {
-        UsersScreen(viewModel = UsersViewModel(GetUsersUseCase(repository = GitHubRepositoryImpl(ApiModule.gitHubService))), modifier = Modifier.padding())
+        UsersScreen(navController = rememberNavController(), viewModel = UsersViewModel(GetUsersUseCase(repository = GitHubRepositoryImpl(ApiModule.gitHubService))), modifier = Modifier.padding())
     }
 }
 
@@ -113,7 +125,7 @@ fun UserPreview() {
             "bina1204"
         )
         UserView(
-            state
+            state, rememberNavController()
         )
     }
 }
