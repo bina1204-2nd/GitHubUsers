@@ -14,22 +14,56 @@ class UsersViewModel(
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(UsersUiState(emptyList()))
     val uiState: StateFlow<UsersUiState> = _uiState.asStateFlow()
+    private var since: Int = 0
 
     fun getUsers() {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null) }
+            _uiState.update {
+                it.copy(
+                    isLoading = since == 0,
+                    isPaginating = since > 0,
+                    error = null
+                )
+            }
             runCatching {
                 val maxUserId = _uiState.value.users.maxOfOrNull { it.id } ?: 0
                 getUsersUseCase(since = maxUserId)
             }
                 .onSuccess { users ->
-                    _uiState.update { it.copy(users = it.users + users, isLoading = false) }
+                    _uiState.update {
+                        it.copy(
+                            users = it.users + users,
+                            isLoading = false,
+                            isPaginating = false
+                        )
+                    }
+                    since = users.last().id
                 }
                 .onFailure { error ->
                     _uiState.update {
-                        it.copy(users = emptyList(), error = error.message, isLoading = false)
+                        it.copy(
+                            error = error.message,
+                            isLoading = false,
+                            isPaginating = false
+                        )
                     }
                 }
+        }
+    }
+
+    fun filterUsers(query: String) {
+        viewModelScope.launch {
+            _uiState.update { currentState ->
+                val filteredUsers = if (query.isBlank()) {
+                    emptyList()
+                } else {
+                    currentState.users.filter { user ->
+                        user.login.contains(query, ignoreCase = true) ||
+                                user.name.contains(query, ignoreCase = true)
+                    }
+                }
+                currentState.copy(filteredUsers = filteredUsers)
+            }
         }
     }
 }

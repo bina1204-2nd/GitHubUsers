@@ -9,26 +9,38 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -79,42 +91,80 @@ fun UsersScreen(
             }
         }
     }
+    var searchText by remember { mutableStateOf("") }
 
     LaunchedEffect(isAtBottom) {
-        if (isAtBottom && !uiState.isLoading) {
+        if (isAtBottom && !uiState.isPaginating && searchText.isEmpty()) {
             viewModel.getUsers()
         }
     }
 
+    LaunchedEffect(searchText) {
+        viewModel.filterUsers(searchText)
+    }
+
     Box(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier
+            .fillMaxSize()
+            .windowInsetsPadding(WindowInsets.statusBars)
+            .safeDrawingPadding(),
         contentAlignment = Alignment.Center
     ) {
         if (uiState.isLoading) {
             CircularProgressIndicator()
         } else {
-            LazyColumn(
-                modifier = modifier
-                    .then(
-                        Modifier
-                            .fillMaxWidth()
-                            .background(Color.DarkGray)
-                    ),
-                state = listState
-            ) {
-                if (uiState.error != null) {
-                    item {
-                        EmptyState(
-                            modifier = Modifier.fillParentMaxSize(),
+            Column(modifier = Modifier.fillMaxSize()) {
+                TextField(
+                    value = searchText,
+                    onValueChange = { searchText = it },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    placeholder = { Text(stringResource(R.string.label_search_users)) },
+                    leadingIcon = { Icon(Icons.Filled.Search, contentDescription = "Search") },
+                    trailingIcon = {
+                        if (searchText.isNotEmpty()) {
+                            IconButton(onClick = { searchText = "" }) {
+                                Icon(Icons.Filled.Clear, contentDescription = "Clear")
+                            }
+                        }
+                    }
+                )
+                LazyColumn(
+                    modifier = modifier
+                        .then(
+                            Modifier
+                                .fillMaxWidth()
+                                .background(Color.DarkGray)
+                        ),
+                    state = listState
+                ) {
+                    if (uiState.error != null) {
+                        item {
+                            EmptyState(
+                                modifier = Modifier.fillParentMaxSize(),
                             title = stringResource(R.string.title_network_error),
                             description = stringResource(R.string.description_network_error),
                             buttonLabel = stringResource(R.string.label_retry),
-                            onButtonClick = { viewModel.getUsers() }
-                        )
-                    }
-                } else {
-                    items(uiState.users) { user ->
-                        UserView(state = UserState(user), navController = navController)
+                                onButtonClick = { viewModel.getUsers() }
+                            )
+                        }
+                    } else {
+                        val usersToDisplay =
+                            if (searchText.isEmpty()) uiState.users else uiState.filteredUsers
+                        items(usersToDisplay) { user ->
+                            UserView(state = UserState(user), navController = navController)
+                        }
+                        if (uiState.isPaginating) {
+                            item {
+                                Box(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    CircularProgressIndicator()
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -210,7 +260,13 @@ fun UsersScreenPreview() {
     GitHubUsersTheme {
         UsersScreen(
             navController = rememberNavController(),
-            viewModel = UsersViewModel(GetUsersUseCase(repository = GitHubRepositoryImpl(ApiModule.gitHubService))),
+            viewModel = UsersViewModel(
+                GetUsersUseCase(
+                    repository = GitHubRepositoryImpl(
+                        ApiModule.gitHubService
+                    )
+                )
+            ),
             modifier = Modifier.padding()
         )
     }

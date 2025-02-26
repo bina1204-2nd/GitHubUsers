@@ -6,6 +6,9 @@
     <string name="label_retry">Retry</string>
     <string name="content_description_user_avatar">User Avatar</string>
 
+    <!-- UsersScreen -->
+    <string name="label_search_users">Search users</string>
+
     <!-- UserDetailScreen -->
     <string name="title_repositories">Repositories</string>
     <string name="followers">Followers: %1$s</string>
