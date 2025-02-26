@@ -2,6 +2,7 @@ package com.gsbina.android.githubusers.ui.users.repos
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -44,17 +45,14 @@ fun UserDetailScreen(viewModel: UserViewModel, username: String) {
         viewModel.fetchUserDetail(username)
     }
 
-    if (uiState.isLoading) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        if (uiState.isLoading) {
             CircularProgressIndicator()
+        } else if (uiState.error != null) {
+            Text(text = "Error: ${uiState.error}")
+        } else {
+            UserDetailContent(uiState.user, uiState.repositories)
         }
-    } else if (uiState.error != null) {
-        Text(text = "Error: ${uiState.error}")
-    } else {
-        UserDetailContent(uiState.user, uiState.repositories)
     }
 }
 
