@@ -18,9 +18,12 @@ class UsersViewModel(
     fun getUsers() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
-            runCatching { getUsersUseCase() }
+            runCatching {
+                val maxUserId = _uiState.value.users.maxOfOrNull { it.id } ?: 0
+                getUsersUseCase(since = maxUserId)
+            }
                 .onSuccess { users ->
-                    _uiState.update { it.copy(users = users, isLoading = false) }
+                    _uiState.update { it.copy(users = it.users + users, isLoading = false) }
                 }
                 .onFailure { error ->
                     _uiState.update {
