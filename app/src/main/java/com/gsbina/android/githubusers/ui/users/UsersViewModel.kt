@@ -6,19 +6,27 @@ import com.gsbina.android.githubusers.domain.users.GetUsersUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class UsersViewModel(
     private val getUsersUseCase: GetUsersUseCase
-): ViewModel() {
+) : ViewModel() {
     private val _uiState = MutableStateFlow(UsersUiState(emptyList()))
     val uiState: StateFlow<UsersUiState> = _uiState.asStateFlow()
 
     fun getUsers() {
         viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, error = null) }
             runCatching { getUsersUseCase() }
-                .onSuccess { _uiState.value = UsersUiState(it) }
-                .onFailure { _uiState.value = UsersUiState(emptyList(), it.message) }
+                .onSuccess { users ->
+                    _uiState.update { it.copy(users = users, isLoading = false) }
+                }
+                .onFailure { error ->
+                    _uiState.update {
+                        it.copy(users = emptyList(), error = error.message, isLoading = false)
+                    }
+                }
         }
     }
 }

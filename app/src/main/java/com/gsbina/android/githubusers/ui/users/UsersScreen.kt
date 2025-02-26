@@ -5,6 +5,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -17,6 +18,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -55,27 +57,38 @@ fun UsersScreen(
     modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    LazyColumn(modifier = modifier.then(
-        Modifier
-            .fillMaxWidth()
-            .background(Color.DarkGray))) {
-        if (uiState.error != null) {
-            item {
-                EmptyState(
-                    modifier = Modifier.fillParentMaxSize(),
-                    title = stringResource(R.string.title_network_error),
-                    description = stringResource(R.string.description_network_error),
-                    buttonLabel = stringResource(R.string.label_retry),
-                    onButtonClick = { viewModel.getUsers() }
-                )
-            }
+    Box(
+        modifier = modifier
+            .fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        if (uiState.isLoading) {
+            CircularProgressIndicator()
         } else {
-            items(uiState.users) { user ->
-                UserView(state = UserState(user), navController = navController)
+            LazyColumn(
+                modifier = modifier
+                    .then(
+                        Modifier
+                            .fillMaxWidth()
+                            .background(Color.DarkGray)
+                    )
+            ) {
+                if (uiState.error != null) {
+                    item {
+                        EmptyState(
+                            modifier = Modifier.fillParentMaxSize(),
+                            title = stringResource(R.string.title_network_error),
+                            description = stringResource(R.string.description_network_error),
+                            buttonLabel = stringResource(R.string.label_retry),
+                            onButtonClick = { viewModel.getUsers() }
+                        )
+                    }
+                } else {
+                    items(uiState.users) { user ->
+                        UserView(state = UserState(user), navController = navController)
+                    }
+                }
             }
-        }
-        items(uiState.users) { user ->
-            UserView(state = UserState(user), navController = navController)
         }
     }
     DisposableEffect(lifecycleOwner) {
@@ -166,7 +179,11 @@ fun EmptyState(
 @Composable
 fun UsersScreenPreview() {
     GitHubUsersTheme {
-        UsersScreen(navController = rememberNavController(), viewModel = UsersViewModel(GetUsersUseCase(repository = GitHubRepositoryImpl(ApiModule.gitHubService))), modifier = Modifier.padding())
+        UsersScreen(
+            navController = rememberNavController(),
+            viewModel = UsersViewModel(GetUsersUseCase(repository = GitHubRepositoryImpl(ApiModule.gitHubService))),
+            modifier = Modifier.padding()
+        )
     }
 }
 
