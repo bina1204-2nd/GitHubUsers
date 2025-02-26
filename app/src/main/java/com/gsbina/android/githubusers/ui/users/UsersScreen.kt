@@ -4,9 +4,11 @@ import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -14,6 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,6 +29,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -53,6 +57,21 @@ fun UsersScreen(
         Modifier
             .fillMaxWidth()
             .background(Color.DarkGray))) {
+        if (uiState.error != null) {
+            item {
+                EmptyState(
+                    modifier = Modifier.fillParentMaxSize(),
+                    title = "Network Error",
+                    description = "Please check your internet connection and try again.",
+                    buttonLabel = "Retry",
+                    onButtonClick = { viewModel.getUsers() }
+                )
+            }
+        } else {
+            items(uiState.users) { user ->
+                UserView(state = UserState(user), navController = navController)
+            }
+        }
         items(uiState.users) { user ->
             UserView(state = UserState(user), navController = navController)
         }
@@ -104,6 +123,39 @@ fun UserView(state: UserState, navController: NavController) {
         Spacer(modifier = Modifier.width(16.dp))
         Column {
             Text(text = state.login, style = MaterialTheme.typography.titleMedium)
+        }
+    }
+}
+
+@Composable
+fun EmptyState(
+    modifier: Modifier = Modifier,
+    title: String,
+    description: String,
+    buttonLabel: String,
+    onButtonClick: () -> Unit
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.headlineMedium,
+            textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.size(16.dp))
+        Text(
+            text = description,
+            style = MaterialTheme.typography.bodyMedium,
+            textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.size(16.dp))
+        Button(onClick = onButtonClick) {
+            Text(text = buttonLabel)
         }
     }
 }

@@ -16,8 +16,9 @@ class UsersViewModel(
 
     fun getUsers() {
         viewModelScope.launch {
-            val users = getUsersUseCase()
-            _uiState.value = UsersUiState(users)
+            runCatching { getUsersUseCase() }
+                .onSuccess { _uiState.value = UsersUiState(it) }
+                .onFailure { _uiState.value = UsersUiState(emptyList(), it.message) }
         }
     }
 }
