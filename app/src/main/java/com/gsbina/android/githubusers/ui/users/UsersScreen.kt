@@ -53,6 +53,7 @@ import com.gsbina.android.githubusers.domain.users.GetUsersUseCase
 import com.gsbina.android.githubusers.ui.Screen
 import com.gsbina.android.githubusers.ui.theme.GitHubUsersTheme
 
+/** ユーザー一覧画面 */
 @Composable
 fun UsersScreen(
     navController: NavController,

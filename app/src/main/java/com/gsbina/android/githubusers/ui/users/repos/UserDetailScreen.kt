@@ -40,6 +40,7 @@ import com.gsbina.android.githubusers.data.users.Repository
 import com.gsbina.android.githubusers.ui.theme.GitHubUsersTheme
 import com.gsbina.android.githubusers.ui.users.EmptyState
 
+/** ユーザーリポジトリ画面 */
 @Composable
 fun UserDetailScreen(viewModel: UserViewModel, username: String) {
     val uiState by viewModel.uiState.collectAsState()
