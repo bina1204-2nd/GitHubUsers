@@ -29,10 +29,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.gsbina.android.githubusers.R
 import com.gsbina.android.githubusers.data.users.GitHubUser
 import com.gsbina.android.githubusers.data.users.Repository
 import com.gsbina.android.githubusers.ui.theme.GitHubUsersTheme
@@ -52,9 +54,9 @@ fun UserDetailScreen(viewModel: UserViewModel, username: String) {
         } else if (uiState.error != null) {
             EmptyState(
                 modifier = Modifier,
-                title = "Network Error",
-                description = "Please check your internet connection and try again.",
-                buttonLabel = "Retry",
+                title = stringResource(R.string.title_network_error),
+                description = stringResource(R.string.description_network_error),
+                buttonLabel = stringResource(R.string.label_retry),
                 onButtonClick = { viewModel.fetchUserDetail(username) }
             )
         } else {
@@ -74,7 +76,7 @@ fun UserDetailContent(user: GitHubUser?, repositories: List<Repository>) {
         item {
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "Repositories",
+                text = stringResource(R.string.title_repositories),
                 style = MaterialTheme.typography.headlineSmall,
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
@@ -94,7 +96,7 @@ fun UserHeader(user: GitHubUser) {
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        val contentDescription = "User Avatar"
+        val contentDescription = stringResource(R.string.content_description_user_avatar)
         val modifier = Modifier
             .size(120.dp)
             .clip(CircleShape)
@@ -119,12 +121,12 @@ fun UserHeader(user: GitHubUser) {
         Spacer(modifier = Modifier.height(8.dp))
         Row {
             Text(
-                text = "Followers: ${user.followers}",
+                text = stringResource(R.string.followers, user.followers),
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(end = 16.dp)
             )
             Text(
-                text = "Following: ${user.following}",
+                text = stringResource(R.string.following, user.following),
                 style = MaterialTheme.typography.bodyMedium
             )
         }
@@ -150,12 +152,12 @@ fun RepositoryItem(repository: Repository) {
         Row {
             if (repository.language != null) {
                 Text(
-                    text = "Language: ${repository.language}",
+                    text = stringResource(R.string.repository_language, repository.language),
                     modifier = Modifier.padding(end = 16.dp)
                 )
             }
             if (repository.stargazersCount != null) {
-                Text(text = "Stars: ${repository.stargazersCount}")
+                Text(text = stringResource(R.string.repository_stars, repository.stargazersCount))
             }
         }
         HorizontalDivider(modifier = Modifier.padding(top = 16.dp))

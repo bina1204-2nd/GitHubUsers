@@ -29,6 +29,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -39,6 +40,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil3.compose.AsyncImage
+import com.gsbina.android.githubusers.R
 import com.gsbina.android.githubusers.data.ApiModule
 import com.gsbina.android.githubusers.data.users.GitHubRepositoryImpl
 import com.gsbina.android.githubusers.domain.users.GetUsersUseCase
@@ -61,9 +63,9 @@ fun UsersScreen(
             item {
                 EmptyState(
                     modifier = Modifier.fillParentMaxSize(),
-                    title = "Network Error",
-                    description = "Please check your internet connection and try again.",
-                    buttonLabel = "Retry",
+                    title = stringResource(R.string.title_network_error),
+                    description = stringResource(R.string.description_network_error),
+                    buttonLabel = stringResource(R.string.label_retry),
                     onButtonClick = { viewModel.getUsers() }
                 )
             }
@@ -100,7 +102,7 @@ fun UserView(state: UserState, navController: NavController) {
             .clickable { navController.navigate(Screen.UserDetail.createRoute(state.login)) }
             .background(Color.White)
     ) {
-        val contentDescription = "User Avatar"
+        val contentDescription = stringResource(R.string.content_description_user_avatar)
         val modifier = Modifier
             .size(64.dp)
             .padding(8.dp)

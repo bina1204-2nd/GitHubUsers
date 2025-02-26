@@ -1,3 +1,15 @@
 <resources>
     <string name="app_name">GitHubUsers</string>
+    <!-- common -->
+    <string name="title_network_error">Network Error</string>
+    <string name="description_network_error">Please check your internet connection and try again.</string>
+    <string name="label_retry">Retry</string>
+    <string name="content_description_user_avatar">User Avatar</string>
+
+    <!-- UserDetailScreen -->
+    <string name="title_repositories">Repositories</string>
+    <string name="followers">Followers: %1$s</string>
+    <string name="following">Following: %1$s</string>
+    <string name="repository_language">Language: %1$s</string>
+    <string name="repository_stars">Stars: %1$s</string>
 </resources>
