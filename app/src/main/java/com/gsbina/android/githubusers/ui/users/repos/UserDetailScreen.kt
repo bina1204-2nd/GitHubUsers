@@ -36,6 +36,7 @@ import coil3.compose.AsyncImage
 import com.gsbina.android.githubusers.data.users.GitHubUser
 import com.gsbina.android.githubusers.data.users.Repository
 import com.gsbina.android.githubusers.ui.theme.GitHubUsersTheme
+import com.gsbina.android.githubusers.ui.users.EmptyState
 
 @Composable
 fun UserDetailScreen(viewModel: UserViewModel, username: String) {
@@ -49,7 +50,13 @@ fun UserDetailScreen(viewModel: UserViewModel, username: String) {
         if (uiState.isLoading) {
             CircularProgressIndicator()
         } else if (uiState.error != null) {
-            Text(text = "Error: ${uiState.error}")
+            EmptyState(
+                modifier = Modifier,
+                title = "Network Error",
+                description = "Please check your internet connection and try again.",
+                buttonLabel = "Retry",
+                onButtonClick = { viewModel.fetchUserDetail(username) }
+            )
         } else {
             UserDetailContent(uiState.user, uiState.repositories)
         }
